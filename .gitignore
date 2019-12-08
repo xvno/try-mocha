@@ -1,4 +1,4 @@
-test/**/*/db
+/**/*/db
 nedb/db
 **/*/db
 *.db
