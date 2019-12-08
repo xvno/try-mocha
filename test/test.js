@@ -1,4 +1,4 @@
-/* globals before, describe, it */
+/* globals describe, it */
 console.log('mocha testing...');
 const assert = require('assert');
 
@@ -119,7 +119,7 @@ describe('DIT', function() {
                 );
             });
             it('AddScene', function() {
-                return addScene(userid, episode).then(v => {
+                return addScene(userid, scene).then(v => {
                     assert(isValidPlainObject(v.data), 'should be an object');
                 });
             });

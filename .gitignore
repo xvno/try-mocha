@@ -1,5 +1,9 @@
 test/**/*/db
-test/db
+nedb/db
+**/*/db
+*.db
+db
+
 
 
 # Logs
