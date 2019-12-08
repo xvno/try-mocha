@@ -1,0 +1,21 @@
+{
+    "name": "try-mocha",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "mocha ./test/test.js"
+    },
+    "author": "vno <Volving@Icloud.Com> (http://vno.io)",
+    "license": "MIT",
+    "devDependencies": {
+        "chai": "^4.2.0",
+        "eslint": "^6.7.2",
+        "mocha": "^6.2.2",
+        "nedb": "^1.8.0",
+        "nyc": "^14.1.1"
+    },
+    "dependencies": {
+        "lodash": "^4.17.15"
+    }
+}
