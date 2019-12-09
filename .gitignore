@@ -4,6 +4,7 @@ nedb/db
 *.db
 db
 
+conf.js
 
 
 # Logs
