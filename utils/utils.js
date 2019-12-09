@@ -100,7 +100,7 @@ function traversGet(obj, zigzag) {
         let parts = zigzag.split('.');
         let len = parts.length;
         if (len > 0) {
-            for (i = 0; i < len; i++) {
+            for (let i = 0; i < len; i++) {
                 ret = ret[parts[i]];
                 if (ret === null && i < len - 1) {
                     ret = ret[parts[i]] = {};
