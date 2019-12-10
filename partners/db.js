@@ -95,7 +95,7 @@ function setSession(session) {
     });
 }
 
-/***********************************************************************************************************/
+/*****************************************************************************************************************/
 
 function getProjectData(userid, projectid) {
     return getProject(userid, projectid)
@@ -213,23 +213,6 @@ function getEpisodeListViaPIDList(userid, pidlist) {
             }
         );
     });
-    /* let taskList = [];
-    let container = [];
-    for (let i = pidlist.length - 1; i > 0; i--) {
-        taskList.push(getEpisodeList(userid, pidlist[i], container));
-    }
-    return Promise.allSettled(taskList).then(
-        v => {
-            console.log('v: ', v);
-            return container;
-            // return Promise.resolve(container);
-        },
-        r => {
-            console.log('r: ', r);
-            return container;
-            // return Promise.resolve(container);
-        }
-    ); */
 }
 function getTakeDataForShot(userid, shotList) {
     let shotIDList = shotList.map(e => e.id);
@@ -319,7 +302,10 @@ function getSceneDataForEpisode(userid, episodeList) {
     });
 }
 
-/***********************************************************************************************************/
+
+/*****************************************************************************************************************/
+
+
 function setProjectData(projectData) {
     let project = _.cloneDeep(projectData);
     let { userid } = project;
@@ -402,7 +388,8 @@ function setProjectData(projectData) {
     return updateProject(userid, project);
 }
 
-/********************************************************************************************************/
+/*****************************************************************************************************************/
+
 function clearDB() {
     return new Promise(function(resolve, reject) {
         db.remove({}, { multi: true }, (err, amt) => {
@@ -425,34 +412,6 @@ function clearDB() {
         });
     });
 }
-
-// function getProjectData(userid, id) {
-//     let project;
-//     return new Promise(function (resolve, reject) {
-//         return getProject(userid, id).then(v => {
-//             let p = v.data;
-//             if (isValidPlainObject(p)) {
-//                 project = p;
-//                 return getEpisodeList(userid, id).then(vv => {
-//                     let episodelist = vv.data;
-//                     if (isValidArray(episodelist)) {
-//                         p.children = episodelist;
-
-//                     }
-//                 })
-//             }
-//         }).catch(e => {
-//             reject({
-//                 state: 1,
-//                 data: {
-//                     error: e
-//                 }
-//             })
-//         }).finally(() => {
-
-//         })
-//     })
-// }
 
 function getProject(userid, id) {
     return new Promise(function(resolve, reject) {
@@ -925,6 +884,10 @@ function updateTake(userid, take) {
         );
     });
 }
+
+
+/*****************************************************************************************************************/
+
 function exclude(list, sublist) {
     return list.reduce((pre, item) => {
         if (!sublist.includes(item)) {
@@ -1062,6 +1025,11 @@ function destruct(project) {
         takeList
     };
 }
+
+
+/*****************************************************************************************************************/
+
+
 module.exports = {
     initDB,
     clearDB,
