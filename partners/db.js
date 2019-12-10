@@ -503,6 +503,7 @@ function updateProject(userid, project) {
         db.update(
             { userid, mag: 'project', id: project.id },
             { $set: project },
+            { upsert: true },
             (err, amt) => {
                 if (err) {
                     reject({
