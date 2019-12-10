@@ -4,7 +4,7 @@ const Nedb = require('nedb');
 const path = require('path');
 const { CODE, MESSAGE } = require('./code.js');
 let db = null;
-let dbfile = path.resolve(__dirname, 'database');
+let dbfile = path.resolve(__dirname, 'database.db');
 const {
     isValidArray /* , isValidPlainObject */
 } = require('../utils/utils.js');

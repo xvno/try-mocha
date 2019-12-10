@@ -31,34 +31,80 @@ describe('DIT', function() {
         let projectList;
         before(function() {
             return getSessionLite().then(v => {
-                if (v.ts + v.expires_in <= Date.now()) {
-                    console.log('登录...');
-                    return login({ username, password })
-                        .then(
-                            vv => {
-                                session = vv.data;
-                                userid = session.id;
-                                session.userid = userid;
-                                accessToken = session.access_token;
-                                return vv;
-                            },
-                            r => {
-                                console.log('r: ', r);
-                                return Promise.reject(r);
-                            }
-                        )
-                        .then(() => {
-                            return setSession(session);
+                if (isValidPlainObject(v) && isValidPlainObject(v.data)) {
+                    if (v.ts + v.expires_in <= Date.now()) {
+                        console.log('登录...');
+                        return login({
+                            username,
+                            password
                         })
-                        .catch(e => {
-                            return Promise.reject(e);
-                        });
+                            .then(
+                                vv => {
+                                    session = vv.data;
+                                    userid = session.id;
+                                    session.userid = userid;
+                                    accessToken = session.access_token;
+                                    return vv;
+                                },
+                                r => {
+                                    console.log('r: ', r);
+                                    return Promise.reject(r);
+                                }
+                            )
+                            .then(() => {
+                                return setSession(session);
+                            })
+                            .catch(e => {
+                                return Promise.reject(e);
+                            });
+                    }
+                    console.log('直接获取session...');
+                    session = v.data;
+                    userid = session.id;
+                    session.userid = userid;
+                    accessToken = session.access_token;
                 }
-                console.log('直接获取session...');
-                session = v.data;
-                userid = session.id;
-                session.userid = userid;
-                accessToken = session.access_token;
+            });
+        });
+
+        describe('Session', function() {
+            it('# getSession: ', function() {
+                return getSessionLite().then(v => {
+                    console.log('v: ', v);
+                    assert(isValidPlainObject(v.data), 'should more than 0');
+                });
+            });
+            it('# login', function() {
+                return login({ username, password }).then(
+                    v => {
+                        console.log('v: ', v);
+                        session = v.data;
+                        session.userid = session.id;
+                        userid = session.id;
+                        return v;
+                    },
+                    r => {
+                        console.log('r: ', r);
+                        return Promise.reject(r);
+                    }
+                );
+            });
+            /* it('# getSession: ', function() {
+                return getSession().then(v => {
+                    console.log('getSession v: ', v);
+                    assert(isNull(v.data), 'should more than 0');
+                });
+            }); */
+            it('# setSession: ', function() {
+                return setSession(session).then(v => {
+                    console.log('setSession-v: ', v);
+                });
+            });
+            it('# getSession: ', function() {
+                return getSession(userid).then(v => {
+                    console.log('getSession2-v: ', v);
+                    assert(isValidPlainObject(v.data), 'should more than 0');
+                });
             });
         });
         describe('Project', function() {
@@ -158,45 +204,5 @@ describe('DIT', function() {
             });
         });
 
-        describe('Session', function() {
-            it('# getSession: ', function() {
-                return getSessionLite().then(v => {
-                    console.log('v: ', v);
-                    assert(isValidPlainObject(v.data), 'should more than 0');
-                });
-            });
-            it('# getSession: ', function() {
-                return getSession().then(v => {
-                    console.log('v: ', v);
-                    assert(isNull(v.data), 'should more than 0');
-                });
-            });
-            it('# login', function() {
-                return login({ username, password }).then(
-                    v => {
-                        console.log('v: ', v);
-                        session = v.data;
-                        session.userid = session.id;
-                        userid = session.id;
-                        return v;
-                    },
-                    r => {
-                        console.log('r: ', r);
-                        return Promise.reject(r);
-                    }
-                );
-            });
-            it('# setSession: ', function() {
-                return setSession(session).then(v => {
-                    console.log('setSession-v: ', v);
-                });
-            });
-            it('# getSession: ', function() {
-                return getSession(userid).then(v => {
-                    console.log('getSession2-v: ', v);
-                    assert(isValidPlainObject(v.data), 'should more than 0');
-                });
-            });
-        });
     });
 });
