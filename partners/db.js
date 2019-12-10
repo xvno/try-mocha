@@ -2,10 +2,12 @@
 const _ = require('lodash');
 const Nedb = require('nedb');
 const path = require('path');
-
+const { CODE, MESSAGE } = require('./code.js');
 let db = null;
 let dbfile = path.resolve(__dirname, 'database');
-const { isValidArray, isValidPlainObject } = require('../utils/utils.js');
+const {
+    isValidArray /* , isValidPlainObject */
+} = require('../utils/utils.js');
 
 console.log('dbfile: \n', dbfile);
 
@@ -22,15 +24,16 @@ function getSessionLite() {
         db.findOne({ mag: 'session' }, (err, doc) => {
             if (err) {
                 reject({
-                    state: 1,
+                    state: CODE.STATE_ERROR,
+                    message: MESSAGE.DB_ACCESS,
                     data: {
-                        detail: 'error occurred',
+                        detail: '获取"Session(Lite)"信息出错',
                         error: err
                     }
                 });
             }
             resolve({
-                state: 0,
+                state: CODE.STATE_OK,
                 data: doc
             });
         });
@@ -41,15 +44,16 @@ function getSession(userid) {
         db.findOne({ mag: 'session', userid }, (err, doc) => {
             if (err) {
                 reject({
-                    state: 1,
+                    state: CODE.STATE_ERROR,
+                    message: MESSAGE.DB_ACCESS,
                     data: {
-                        detail: 'error occurred',
+                        detail: '获取"Session"信息出错',
                         error: err
                     }
                 });
             }
             resolve({
-                state: 0,
+                state: CODE.STATE_OK,
                 data: doc
             });
         });
@@ -76,15 +80,16 @@ function setSession(session) {
             (err, amt, upsert) => {
                 if (err) {
                     reject({
-                        state: 1,
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
-                            detail: 'error occurred',
+                            detail: '存储"Session"信息出错',
                             error: err
                         }
                     });
                 }
                 resolve({
-                    state: 0,
+                    state: CODE.STATE_OK,
                     data: {
                         amt,
                         upsert
@@ -96,6 +101,29 @@ function setSession(session) {
 }
 
 /*****************************************************************************************************************/
+
+function getProjectList(userid) {
+    return new Promise(function(resolve, reject) {
+        db.find(
+            {
+                userid
+            },
+            (err, list) => {
+                if (err) {
+                    reject({
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
+                        data: {
+                            detail: '获"项目列表"信息出错',
+                            error: err
+                        }
+                    });
+                }
+                resolve(list);
+            }
+        );
+    });
+}
 
 function getProjectData(userid, projectid) {
     return getProject(userid, projectid)
@@ -146,13 +174,13 @@ function getProjectData(userid, projectid) {
                                                 );
                                             });
                                             return {
-                                                state: 0,
+                                                state: CODE.STATE_OK,
                                                 data: projectList
                                             };
                                         },
                                         () => {
                                             return Promise.resolve({
-                                                state: 0,
+                                                state: CODE.STATE_OK,
                                                 data: project
                                             });
                                         }
@@ -160,7 +188,7 @@ function getProjectData(userid, projectid) {
                                 },
                                 () => {
                                     return Promise.resolve({
-                                        state: 0,
+                                        state: CODE.STATE_OK,
                                         data: project
                                     });
                                 }
@@ -168,7 +196,7 @@ function getProjectData(userid, projectid) {
                         },
                         () => {
                             return Promise.resolve({
-                                state: 0,
+                                state: CODE.STATE_OK,
                                 data: project
                             });
                         }
@@ -177,7 +205,7 @@ function getProjectData(userid, projectid) {
                 () => {
                     // without episode
                     return Promise.resolve({
-                        state: 0,
+                        state: CODE.STATE_OK,
                         data: project
                     });
                 }
@@ -201,8 +229,8 @@ function getEpisodeListViaPIDList(userid, pidlist) {
             (err, list) => {
                 if (err) {
                     reject({
-                        state: 1,
-                        message: 'DB error',
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
                             detail: '获取"集"信息出错',
                             error: err
@@ -230,8 +258,8 @@ function getTakeDataForShot(userid, shotList) {
             (err, list) => {
                 if (err) {
                     reject({
-                        state: 1,
-                        message: 'DB error',
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
                             detail: '获取"次"信息出错',
                             error: err
@@ -259,8 +287,8 @@ function getShotDataForScene(userid, sceneList) {
             (err, list) => {
                 if (err) {
                     reject({
-                        state: 1,
-                        message: 'DB error',
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
                             detail: '获取"镜"信息出错',
                             error: err
@@ -288,8 +316,8 @@ function getSceneDataForEpisode(userid, episodeList) {
             (err, list) => {
                 if (err) {
                     reject({
-                        state: 1,
-                        message: 'DB error',
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
                             detail: '获取"场"信息出错',
                             error: err
@@ -302,9 +330,7 @@ function getSceneDataForEpisode(userid, episodeList) {
     });
 }
 
-
 /*****************************************************************************************************************/
-
 
 function setProjectData(projectData) {
     let project = _.cloneDeep(projectData);
@@ -395,8 +421,8 @@ function clearDB() {
         db.remove({}, { multi: true }, (err, amt) => {
             if (err) {
                 reject({
-                    state: 1,
-                    message: 'DB Error',
+                    state: CODE.STATE_ERROR,
+                    message: MESSAGE.DB_ACCESS,
                     data: {
                         detail: 'Remove 数据出错',
                         error: err
@@ -404,7 +430,7 @@ function clearDB() {
                 });
             }
             resolve({
-                state: 0,
+                state: CODE.STATE_OK,
                 data: {
                     amt
                 }
@@ -418,8 +444,8 @@ function getProject(userid, id) {
         db.findOne({ userid, mag: 'project', id }, (err, doc) => {
             if (err) {
                 reject({
-                    state: 1,
-                    message: 'DB Error',
+                    state: CODE.STATE_ERROR,
+                    message: MESSAGE.DB_ACCESS,
                     data: {
                         detail: 'FindOne 数据出错',
                         error: err
@@ -427,7 +453,7 @@ function getProject(userid, id) {
                 });
             }
             resolve({
-                state: 0,
+                state: CODE.STATE_OK,
                 data: doc
             });
         });
@@ -440,8 +466,8 @@ function addProject(userid, project) {
             (err, doc) => {
                 if (err) {
                     reject({
-                        state: 1,
-                        message: 'DB Error',
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
                             detail: 'Insert 数据出错',
                             error: err
@@ -449,7 +475,7 @@ function addProject(userid, project) {
                     });
                 }
                 resolve({
-                    state: 0,
+                    state: CODE.STATE_OK,
                     data: doc
                 });
             }
@@ -466,8 +492,8 @@ function updateProject(userid, project) {
             (err, amt) => {
                 if (err) {
                     reject({
-                        state: 1,
-                        message: 'DB Error',
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
                             detail: 'Update 数据出错',
                             error: err
@@ -475,7 +501,7 @@ function updateProject(userid, project) {
                     });
                 }
                 resolve({
-                    state: 0,
+                    state: CODE.STATE_OK,
                     data: {
                         amt
                     }
@@ -489,8 +515,8 @@ function getEpisodeList(userid, projectid) {
         db.find({ userid, mag: 'episode', projectid }, (err, doc) => {
             if (err) {
                 reject({
-                    state: 1,
-                    message: 'DB Error',
+                    state: CODE.STATE_ERROR,
+                    message: MESSAGE.DB_ACCESS,
                     data: {
                         detail: 'FindOne 数据出错',
                         error: err
@@ -498,7 +524,7 @@ function getEpisodeList(userid, projectid) {
                 });
             }
             resolve({
-                state: 0,
+                state: CODE.STATE_OK,
                 data: doc
             });
         });
@@ -509,8 +535,8 @@ function getEpisode(userid, projectid, id) {
         db.findOne({ userid, mag: 'episode', projectid, id }, (err, doc) => {
             if (err) {
                 reject({
-                    state: 1,
-                    message: 'DB Error',
+                    state: CODE.STATE_ERROR,
+                    message: MESSAGE.DB_ACCESS,
                     data: {
                         detail: 'FindOne 数据出错',
                         error: err
@@ -518,7 +544,7 @@ function getEpisode(userid, projectid, id) {
                 });
             }
             resolve({
-                state: 0,
+                state: CODE.STATE_OK,
                 data: doc
             });
         });
@@ -531,8 +557,8 @@ function addEpisode(userid, episode) {
             (err, doc) => {
                 if (err) {
                     reject({
-                        state: 1,
-                        message: 'DB Error',
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
                             detail: 'Insert 数据出错',
                             error: err
@@ -540,7 +566,7 @@ function addEpisode(userid, episode) {
                     });
                 }
                 resolve({
-                    state: 0,
+                    state: CODE.STATE_OK,
                     data: doc
                 });
             }
@@ -562,8 +588,8 @@ function updateEpisode(userid, episode) {
             (err, amt) => {
                 if (err) {
                     reject({
-                        state: 1,
-                        message: 'DB Error',
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
                             detail: 'Update 数据出错',
                             error: err
@@ -571,7 +597,7 @@ function updateEpisode(userid, episode) {
                     });
                 }
                 resolve({
-                    state: 0,
+                    state: CODE.STATE_OK,
                     data: {
                         amt
                     }
@@ -585,8 +611,8 @@ function getSceneList(userid, projectid, episodeid) {
         db.find({ userid, mag: 'scene', projectid, episodeid }, (err, list) => {
             if (err) {
                 reject({
-                    state: 1,
-                    message: 'DB Error',
+                    state: CODE.STATE_ERROR,
+                    message: MESSAGE.DB_ACCESS,
                     data: {
                         detail: 'FindOne 数据出错',
                         error: err
@@ -594,7 +620,7 @@ function getSceneList(userid, projectid, episodeid) {
                 });
             }
             resolve({
-                state: 0,
+                state: CODE.STATE_OK,
                 data: list
             });
         });
@@ -608,8 +634,8 @@ function getScene(userid, projectid, episodeid, id) {
             (err, doc) => {
                 if (err) {
                     reject({
-                        state: 1,
-                        message: 'DB Error',
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
                             detail: 'FindOne 数据出错',
                             error: err
@@ -617,7 +643,7 @@ function getScene(userid, projectid, episodeid, id) {
                     });
                 }
                 resolve({
-                    state: 0,
+                    state: CODE.STATE_OK,
                     data: doc
                 });
             }
@@ -631,8 +657,8 @@ function addScene(userid, scene) {
             (err, doc) => {
                 if (err) {
                     reject({
-                        state: 1,
-                        message: 'DB Error',
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
                             detail: 'Insert 数据出错',
                             error: err
@@ -640,7 +666,7 @@ function addScene(userid, scene) {
                     });
                 }
                 resolve({
-                    state: 0,
+                    state: CODE.STATE_OK,
                     data: doc
                 });
             }
@@ -663,8 +689,8 @@ function updateScene(userid, scene) {
             (err, amt) => {
                 if (err) {
                     reject({
-                        state: 1,
-                        message: 'DB Error',
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
                             detail: 'Update 数据出错',
                             error: err
@@ -672,7 +698,7 @@ function updateScene(userid, scene) {
                     });
                 }
                 resolve({
-                    state: 0,
+                    state: CODE.STATE_OK,
                     data: {
                         amt
                     }
@@ -689,8 +715,8 @@ function getShotList(userid, projectid, episodeid, sceneid) {
             (err, doc) => {
                 if (err) {
                     reject({
-                        state: 1,
-                        message: 'DB Error',
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
                             detail: 'FindOne 数据出错',
                             error: err
@@ -698,7 +724,7 @@ function getShotList(userid, projectid, episodeid, sceneid) {
                     });
                 }
                 resolve({
-                    state: 0,
+                    state: CODE.STATE_OK,
                     data: doc
                 });
             }
@@ -713,8 +739,8 @@ function getShot(userid, projectid, episodeid, sceneid, id) {
             (err, doc) => {
                 if (err) {
                     reject({
-                        state: 1,
-                        message: 'DB Error',
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
                             detail: 'FindOne 数据出错',
                             error: err
@@ -722,7 +748,7 @@ function getShot(userid, projectid, episodeid, sceneid, id) {
                     });
                 }
                 resolve({
-                    state: 0,
+                    state: CODE.STATE_OK,
                     data: doc
                 });
             }
@@ -735,8 +761,8 @@ function addShot(userid, shot) {
         db.insert({ userid, mag: 'shot', ...shot, alive: true }, (err, doc) => {
             if (err) {
                 reject({
-                    state: 1,
-                    message: 'DB Error',
+                    state: CODE.STATE_ERROR,
+                    message: MESSAGE.DB_ACCESS,
                     data: {
                         detail: 'Insert 数据出错',
                         error: err
@@ -744,7 +770,7 @@ function addShot(userid, shot) {
                 });
             }
             resolve({
-                state: 0,
+                state: CODE.STATE_OK,
                 data: doc
             });
         });
@@ -766,8 +792,8 @@ function updateShot(userid, shot) {
             (err, amt) => {
                 if (err) {
                     reject({
-                        state: 1,
-                        message: 'DB Error',
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
                             detail: 'Update 数据出错',
                             error: err
@@ -775,7 +801,7 @@ function updateShot(userid, shot) {
                     });
                 }
                 resolve({
-                    state: 0,
+                    state: CODE.STATE_OK,
                     data: {
                         amt
                     }
@@ -791,8 +817,8 @@ function getTakeList(userid, projectid, episodeid, sceneid, shotid) {
             (err, doc) => {
                 if (err) {
                     reject({
-                        state: 1,
-                        message: 'DB Error',
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
                             detail: 'FindOne 数据出错',
                             error: err
@@ -800,7 +826,7 @@ function getTakeList(userid, projectid, episodeid, sceneid, shotid) {
                     });
                 }
                 resolve({
-                    state: 0,
+                    state: CODE.STATE_OK,
                     data: doc
                 });
             }
@@ -814,8 +840,8 @@ function getTake(userid, projectid, episodeid, sceneid, shotid, id) {
             (err, doc) => {
                 if (err) {
                     reject({
-                        state: 1,
-                        message: 'DB Error',
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
                             detail: 'FindOne 数据出错',
                             error: err
@@ -823,7 +849,7 @@ function getTake(userid, projectid, episodeid, sceneid, shotid, id) {
                     });
                 }
                 resolve({
-                    state: 0,
+                    state: CODE.STATE_OK,
                     data: doc
                 });
             }
@@ -835,8 +861,8 @@ function addTake(userid, take) {
         db.insert({ userid, mag: 'take', ...take, alive: true }, (err, doc) => {
             if (err) {
                 reject({
-                    state: 1,
-                    message: 'DB Error',
+                    state: CODE.STATE_ERROR,
+                    message: MESSAGE.DB_ACCESS,
                     data: {
                         detail: 'Insert 数据出错',
                         error: err
@@ -844,7 +870,7 @@ function addTake(userid, take) {
                 });
             }
             resolve({
-                state: 0,
+                state: CODE.STATE_OK,
                 data: doc
             });
         });
@@ -866,8 +892,8 @@ function updateTake(userid, take) {
             (err, amt) => {
                 if (err) {
                     reject({
-                        state: 1,
-                        message: 'DB Error',
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.DB_ACCESS,
                         data: {
                             detail: 'Update 数据出错',
                             error: err
@@ -875,7 +901,7 @@ function updateTake(userid, take) {
                     });
                 }
                 resolve({
-                    state: 0,
+                    state: CODE.STATE_OK,
                     data: {
                         amt
                     }
@@ -884,7 +910,6 @@ function updateTake(userid, take) {
         );
     });
 }
-
 
 /*****************************************************************************************************************/
 
@@ -1026,9 +1051,7 @@ function destruct(project) {
     };
 }
 
-
 /*****************************************************************************************************************/
-
 
 module.exports = {
     initDB,
@@ -1036,6 +1059,7 @@ module.exports = {
     getSession,
     setSession,
     getSessionLite,
+    getProjectList,
     getProjectData,
     setProjectData,
     getProject,

@@ -21,7 +21,7 @@ function getFileMeta(filePath) {
         ffprobe(filePath, { path: ffprobeStatic.path }, function(error, info) {
             if (error) {
                 return reject({
-                    state: 1,
+                    state: CODE.STATE_ERROR,
                     message: '获取文件meta信息失败',
                     data: {
                         detail: '',
@@ -31,7 +31,7 @@ function getFileMeta(filePath) {
             }
             console.log(info);
             resolve({
-                state: 0,
+                state: CODE.STATE_OK,
                 data: info
             });
         });

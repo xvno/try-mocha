@@ -4,7 +4,7 @@ const { uac } = require('./networking');
 const { secrets } = require('../../conf');
 
 const { isValidObject, isValidString } = require('../../utils/utils');
-
+const { CODE, MESSAGE } = require('../code');
 const {
     /* bc,
     bcSecretKey,
@@ -79,12 +79,13 @@ function login(formData) {
                 let userInfo = v.data && v.data.data;
                 if (isValidObject(userInfo)) {
                     return Promise.resolve({
-                        state: 0,
+                        state: CODE.STATE_OK,
                         data: Object.assign({}, authInfo, userInfo)
                     });
                 } else {
                     return Promise.reject({
-                        state: 1,
+                        state: CODE.STATE_ERROR,
+                        message: MESSAGE.API_NO_DATA,
                         data: {
                             detail: '用户信息为空',
                             error: null
@@ -96,7 +97,7 @@ function login(formData) {
                 console.log('Caught e in api/iqiyi/user.login.catch');
                 // console.log(err);
                 return Promise.reject({
-                    state: 1,
+                    state: CODE.STATE_ERROR,
                     code: err.code,
                     data: {
                         detail: err.code || '',
@@ -106,7 +107,8 @@ function login(formData) {
             });
     } else {
         return Promise.reject({
-            state: 1,
+            state: CODE.STATE_ERROR,
+            message: MESSAGE.API_PARAM,
             data: {
                 detail: '用户名 or 密码错误',
                 error: { username, password }

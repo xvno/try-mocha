@@ -91,12 +91,12 @@ function fetchProjectScene(userid, accessToken, projectid) {
                     let data = formatRawData(rawData, userid);
                     // console.log('data: ', JSON.stringify(data));
                     return Promise.resolve({
-                        state: 0,
+                        state: CODE.STATE_OK,
                         data: data
                     });
                 } else {
                     return Promise.reject({
-                        state: 1,
+                        state: CODE.STATE_ERROR,
                         data: {
                             detail: '服务器响应信息中不包含 .data 数据',
                             error: null
@@ -107,7 +107,7 @@ function fetchProjectScene(userid, accessToken, projectid) {
             .catch(e => {
                 console.log('Got e in project.fetchSceneList\n', e);
                 return Promise.reject({
-                    state: 1,
+                    state: CODE.STATE_ERROR,
                     data: {
                         detail: e.code || '未知错误',
                         error: e
@@ -116,7 +116,7 @@ function fetchProjectScene(userid, accessToken, projectid) {
             });
     } else {
         return Promise.reject({
-            state: 1,
+            state: CODE.STATE_ERROR,
             data: {
                 detail: '未能得到正确的请求参数:sign',
                 error: null

@@ -11,7 +11,7 @@ function getEpisodeDataViaProjectList(projectList) {
     });
     return Promise.allSettled(tasks).then(() => {
         return Promise.resolve({
-            state: 0,
+            state: CODE.STATE_OK,
             data: projectList
         });
     });
@@ -29,7 +29,7 @@ function getEpisodeDataViaProject(project, deep) {
             (err, docs) => {
                 if (err) {
                     reject({
-                        state: 1,
+                        state: CODE.STATE_ERROR,
                         message: 'DB error',
                         data: {
                             detail: '获取"集"信息出错',
@@ -46,7 +46,7 @@ function getEpisodeDataViaProject(project, deep) {
                     return Promise.allSettled(taskList);
                 } else {
                     resolve({
-                        state: 0,
+                        state: CODE.STATE_OK,
                         data: docs
                     });
                 }
@@ -68,7 +68,7 @@ function getSceneDataViaEpisode(episode, deep) {
             (err, docs) => {
                 if (err) {
                     reject({
-                        state: 1,
+                        state: CODE.STATE_ERROR,
                         message: 'DB error',
                         data: {
                             detail: '获取"场"信息出错',
@@ -85,7 +85,7 @@ function getSceneDataViaEpisode(episode, deep) {
                     return Promise.allSettled(taskList);
                 }
                 resolve({
-                    state: 0,
+                    state: CODE.STATE_OK,
                     data: docs
                 });
             }
@@ -107,7 +107,7 @@ function getShotDataViaScene(scene, deep) {
             (err, docs) => {
                 if (err) {
                     reject({
-                        state: 1,
+                        state: CODE.STATE_ERROR,
                         message: 'DB error',
                         data: {
                             detail: '获取"镜"信息出错',
@@ -124,7 +124,7 @@ function getShotDataViaScene(scene, deep) {
                     return Promise.allSettled(taskList);
                 }
                 resolve({
-                    state: 0,
+                    state: CODE.STATE_OK,
                     data: docs
                 });
             }
@@ -148,7 +148,7 @@ function getTakeDataViaShot(shot) {
             (err, docs) => {
                 if (err) {
                     reject({
-                        state: 1,
+                        state: CODE.STATE_ERROR,
                         message: 'DB error',
                         data: {
                             detail: '获取"次"信息出错',
@@ -158,7 +158,7 @@ function getTakeDataViaShot(shot) {
                 }
                 shot.children = docs;
                 resolve({
-                    state: 0,
+                    state: CODE.STATE_OK,
                     data: docs
                 });
             }

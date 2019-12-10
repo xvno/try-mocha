@@ -60,7 +60,7 @@ describe('DIT', function() {
                 accessToken = session.access_token;
             });
         });
-        describe.only('Project', function() {
+        describe('Project', function() {
             describe('# remote', function() {
                 it('# fetchProjectList', function() {
                     return fetchProjectList(userid, accessToken).then(v => {
@@ -138,7 +138,7 @@ describe('DIT', function() {
                     console.log('getProjectData: projectid: ', p.id);
                     return getProjectData(userid, p.id).then(v => {
                         console.log('getProjectData: v:\n', v);
-                        
+
                         assert(
                             isValidPlainObject(v) && isValidArray(v.data),
                             'should be an object'
