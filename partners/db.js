@@ -398,18 +398,38 @@ function setProjectData(projectData) {
                 console.log(`take:\n`, take);
             });
         }
-        Promise.allSettled(episodeTasks).then(eplist => {
-            console.log('episods: ', eplist.find(i => i.state === 0).length);
-        });
-        Promise.allSettled(sceneTasks).then(sclist => {
-            console.log('scenes: ', sclist.find(i => i.state === 0).length);
-        });
-        Promise.allSettled(shotTasks).then(shlist => {
-            console.log('shots: ', shlist.find(i => i.state === 0).length);
-        });
-        Promise.allSettled(takeTasks).then(talist => {
-            console.log('takes: ', talist.find(i => i.state === 0).length);
-        });
+
+        Promise.allSettled(episodeTasks)
+            .then(eplist => {
+                console.log(
+                    'episods: ',
+                    eplist.filter(i => i.state === 0).length
+                );
+            })
+            .catch(e => {
+                console.log('e:', e);
+            });
+        Promise.allSettled(sceneTasks)
+            .then(sclist => {
+                console.log('scenes: ', sclist.filter(i => i.state === 0).length);
+            })
+            .catch(e => {
+                console.log('e:', e);
+            });
+        Promise.allSettled(shotTasks)
+            .then(shlist => {
+                console.log('shots: ', shlist.filter(i => i.state === 0).length);
+            })
+            .catch(e => {
+                console.log('e:', e);
+            });
+        Promise.allSettled(takeTasks)
+            .then(talist => {
+                console.log('takes: ', talist.filter(i => i.state === 0).length);
+            })
+            .catch(e => {
+                console.log('e:', e);
+            });
     }
     return updateProject(userid, project);
 }
