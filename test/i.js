@@ -11,7 +11,8 @@ const { login } = require('../partners/i/user');
 const { isValidPlainObject, isValidArray } = require('../utils/utils');
 const {
     fetchProjectList,
-    fetchProjectScene
+    fetchProjectScene,
+    fetchProjectDataList
 } = require('../partners/i/project.js');
 
 const {
@@ -96,6 +97,15 @@ describe('DIT', function() {
                                 'should be an object'
                             );
                         });
+                });
+                it('# fetchProjectDataList', function() {
+                    return fetchProjectDataList(userid, accessToken).then(v => {
+                        console.log('fetchProjectDataList v:\n', v);
+                        assert(
+                            isValidPlainObject(v) && isValidArray(v.data),
+                            'should be an object'
+                        );
+                    });
                 });
             });
             describe('# db', function() {

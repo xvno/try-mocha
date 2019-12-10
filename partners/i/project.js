@@ -12,6 +12,95 @@ const {
     isValidPlainObject
 } = require('../../utils/utils');
 
+function fetchProjectDataList(userid, accessToken) {
+    return fetchProjectList(userid, accessToken).then(v => {
+        if (isValidPlainObject(v)) {
+            let list = v.data || [];
+            if (isValidArray(list) && list.length > 0) {
+                let tasklist = [];
+                list.forEach(project => {
+                    tasklist.push(
+                        fetchProjectScene(userid, accessToken, project.id)
+                    );
+                });
+                return Promise.allSettled(tasklist).then(v => {
+                    console.log('fetchProjectDataList raw:\n', v);
+                    if (isValidArray(v) && v.length > 0) {
+                        v.forEach(ret => {
+                            if (isValidPlainObject(ret.value)) {
+                                let data = ret.value.data;
+                                let idx = list.findIndex(
+                                    project => project.id === data.id
+                                );
+                                if (idx > -1) {
+                                    list.splice(idx, 1, data);
+                                }
+                            }
+                        });
+                    }
+                    return Promise.resolve({
+                        state: CODE.STATE_OK,
+                        message: '请求成功',
+                        data: list
+                    });
+                });
+            } else {
+                return Promise.reject({
+                    state: CODE.STATE_ERROR,
+                    message: MESSAGE.API_DATA_TYPE_I,
+                    data: { detail: '请求第三方接口, 返回结果错误' }
+                });
+            }
+        } else {
+            return Promise.reject({
+                state: CODE.STATE_ERROR,
+                message: MESSAGE.API_NO_DATA_I,
+                data: { detail: '请求第三方接口, 返回结果错误' }
+            });
+        }
+    });
+}
+/*
+async function fetchProjectDataList(userid, accessToken) {
+    let state, message, data;
+    try {
+        let v = await fetchProjectList(userid, accessToken);
+        if (isValidPlainObject(v)) {
+            let list = v.data || [];
+            if (isValidArray(list) && list.length > 0) {
+                list.forEach(project => {
+                    let vv = await fetchProjectScene(userid, accessToken, project.id);
+                    if (isValidPlainObject(vv.data)) {
+                        Object.assign(project, vv.data);
+                    }
+                });
+                state = CODE.STATE_OK;
+                message = '请求成功';
+                data = list;
+            } else {
+                state = CODE.STATE_ERROR;
+                message = MESSAGE.API_DATA_TYPE_I;
+                data = {
+                    detail: '请求第三方接口, 返回结果错误'
+                };
+            }
+        } else {
+            state= CODE.STATE_ERROR;
+            message= MESSAGE.API_NO_DATA_I;
+            data= {
+                detail: '请求第三方接口, 返回结果错误'
+            };
+        }
+    } catch (e) {
+        return e;
+    }
+    return {
+        state,
+        message,
+        data
+    };
+}
+ */
 function fetchProjectList(userid, accessToken) {
     let pathName = '/api/shoot/projects';
     let queryObj = {
@@ -58,10 +147,10 @@ function fetchProjectList(userid, accessToken) {
     } else {
         return Promise.reject({
             state: CODE.STATE_ERROR,
-            code: CODE.API_PARAM,
+            code: CODE.API_PARAM_I,
             data: {
-                detail: MESSAGE.API_PARAM,
-                error: new Error(MESSAGE.API_PARAM)
+                detail: MESSAGE.API_PARAM_I,
+                error: new Error(MESSAGE.API_PARAM_I)
             }
         });
     }
@@ -166,5 +255,6 @@ function formatRawData(data, userid) {
 
 module.exports = {
     fetchProjectList,
-    fetchProjectScene
+    fetchProjectScene,
+    fetchProjectDataList
 };
