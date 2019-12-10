@@ -5,9 +5,7 @@ const path = require('path');
 const { CODE, MESSAGE } = require('./code.js');
 let db = null;
 let dbfile = path.resolve(__dirname, 'database.db');
-const {
-    isValidArray /* , isValidPlainObject */
-} = require('../utils/utils.js');
+const { isValidArray, isValidPlainObject } = require('../utils/utils.js');
 
 console.log('dbfile: \n', dbfile);
 
@@ -101,12 +99,119 @@ function setSession(session) {
 }
 
 /*****************************************************************************************************************/
+function getArchData(userid, projectList) {
+    if (isValidArray(projectList)) {
+        let episodeList = null;
+        let projectIdList = projectList.reduce((pre, cur) => {
+            pre.push(cur.id);
+            return pre;
+        }, []);
+        // TODO: 改写getEpisodeList, 使其能查询projectid列表中的所有项目集
+        return getEpisodeListViaPIDList(userid, projectIdList)
+            .then(v => {
+                // v is episode-list;
+                episodeList = v;
+                projectList.forEach(project => {
+                    project.children = episodeList.filter(
+                        episode => episode.projectid === project.id
+                    );
+                    subtract(episodeList, project.children);
+                });
+                return getSceneDataForEpisode(userid, episodeList).then(vv => {
+                    let sceneList = vv;
+                    episodeList.forEach(episode => {
+                        episode.children = sceneList.filter(
+                            scene => scene.episodeid === episode.id
+                        );
+                        subtract(sceneList, episode.children);
+                    });
+                    return getShotDataForScene(userid, sceneList).then(vvv => {
+                        let shotList = vvv;
+                        sceneList.forEach(scene => {
+                            scene.children = shotList.filter(
+                                shot => shot.sceneid === scene.id
+                            );
+                            subtract(shotList, scene.children);
+                        });
+                        return getTakeDataForShot(userid, shotList).then(
+                            vvv => {
+                                let takeList = vvv;
+                                shotList.forEach(shot => {
+                                    shot.children = takeList.filter(
+                                        take => take.shotid === shot.id
+                                    );
+                                    subtract(takeList, shot.children);
+                                });
+                                return {
+                                    state: CODE.STATE_OK,
+                                    data: projectList
+                                };
+                            }
+                        );
+                    });
+                });
+            })
+            .catch(() => {
+                return Promise.resolve({
+                    state: CODE.STATE_OK,
+                    data: projectList
+                });
+            });
+    }
+}
+function subtract(list, sublist) {
+    let idx;
+    if (isValidArray(list)) {
+        if (isValidArray(sublist)) {
+            sublist.forEach(item => {
+                idx = list.indexOf(item);
+                if (idx > -1) {
+                    list.splice(idx, 1);
+                }
+            });
+        } else if (isValidPlainObject(sublist)) {
+            idx = list.findIndex(sublist);
+            if (idx > -1) {
+                list.splice(idx, 1);
+            }
+        }
+    }
+    return list;
+}
+function getProjectDataList(userid) {
+    let projectList;
+    console.log('Jumped into getProjectDataList...');
+    return getProjectList(userid)
+        .then(ret => {
+            projectList = ret.data;
+            console.log(
+                'Jumped into getProjectDataList getProjectList.then:\n',
+                ret.status
+            );
+            if (isValidArray(projectList)) {
+                console.log('Jumped into getProjectDataList ifisvalidArray: ');
+                return getArchData(userid, projectList);
+            }
+        })
+        .catch(e => {
+            console.log('Jumped into getProjectDataList catch:\n', e);
+            if (isValidArray(projectList)) {
+                return Promise.resolve({
+                    state: CODE.STATE_OK,
+                    data: projectList
+                });
+            } else {
+                return Promise.reject(e);
+            }
+        });
+}
 
 function getProjectList(userid) {
     return new Promise(function(resolve, reject) {
         db.find(
             {
-                userid
+                userid,
+                mag: 'project'
             },
             (err, list) => {
                 if (err) {
@@ -119,100 +224,41 @@ function getProjectList(userid) {
                         }
                     });
                 }
-                resolve(list);
+                resolve({
+                    state: CODE.STATE_OK,
+                    data: list
+                });
             }
         );
     });
 }
 
 function getProjectData(userid, projectid) {
+    let projectList;
     return getProject(userid, projectid)
-        .then(project => {
-            console.log('project: ', project);
-            let projectList = [project.data];
-            let episodeList = null;
-            let projectIdList = projectList.reduce((pre, cur) => {
-                pre.push(cur.id);
-                return pre;
-            }, []);
-            // TODO: 改写getEpisodeList, 使其能查询projectid列表中的所有项目集
-            return getEpisodeListViaPIDList(userid, projectIdList).then(
-                v => {
-                    // v is episode-list;
-                    episodeList = v;
-                    projectList.forEach(project => {
-                        project.children = episodeList.find(
-                            episode => episode.projectid === project.id
-                        );
-                    });
-                    return getSceneDataForEpisode(userid, episodeList).then(
-                        vv => {
-                            let sceneList = vv;
-                            episodeList.forEach(episode => {
-                                episode.children = sceneList.find(
-                                    scene => scene.episodeid === episode.id
-                                );
-                            });
-                            return getShotDataForScene(userid, sceneList).then(
-                                vvv => {
-                                    let shotList = vvv;
-                                    sceneList.forEach(scene => {
-                                        scene.children = shotList.find(
-                                            shot => shot.sceneid === scene.id
-                                        );
-                                    });
-                                    return getTakeDataForShot(
-                                        userid,
-                                        shotList
-                                    ).then(
-                                        vvv => {
-                                            let takeList = vvv;
-                                            shotList.forEach(shot => {
-                                                shot.children = takeList.find(
-                                                    take =>
-                                                        take.shotid === shot.id
-                                                );
-                                            });
-                                            return {
-                                                state: CODE.STATE_OK,
-                                                data: projectList
-                                            };
-                                        },
-                                        () => {
-                                            return Promise.resolve({
-                                                state: CODE.STATE_OK,
-                                                data: project
-                                            });
-                                        }
-                                    );
-                                },
-                                () => {
-                                    return Promise.resolve({
-                                        state: CODE.STATE_OK,
-                                        data: project
-                                    });
-                                }
-                            );
-                        },
-                        () => {
-                            return Promise.resolve({
-                                state: CODE.STATE_OK,
-                                data: project
-                            });
-                        }
-                    );
-                },
-                () => {
-                    // without episode
-                    return Promise.resolve({
-                        state: CODE.STATE_OK,
-                        data: project
-                    });
-                }
-            );
+        .then(ret => {
+            console.log('ret: ', ret);
+            if (isValidPlainObject(ret.data)) {
+                projectList = [ret.data];
+                return getArchData(userid, projectList).then(() => {
+                    if (isValidArray(projectList)) {
+                        return {
+                            state: CODE.STATE_OK,
+                            data: projectList[0]
+                        };
+                    }
+                });
+            }
         })
         .catch(e => {
-            return Promise.reject(e);
+            if (isValidArray(projectList)) {
+                return Promise.resolve({
+                    state: CODE.STATE_OK,
+                    data: projectList[0]
+                });
+            } else {
+                return Promise.reject(e);
+            }
         });
 }
 
@@ -411,21 +457,30 @@ function setProjectData(projectData) {
             });
         Promise.allSettled(sceneTasks)
             .then(sclist => {
-                console.log('scenes: ', sclist.filter(i => i.state === 0).length);
+                console.log(
+                    'scenes: ',
+                    sclist.filter(i => i.state === 0).length
+                );
             })
             .catch(e => {
                 console.log('e:', e);
             });
         Promise.allSettled(shotTasks)
             .then(shlist => {
-                console.log('shots: ', shlist.filter(i => i.state === 0).length);
+                console.log(
+                    'shots: ',
+                    shlist.filter(i => i.state === 0).length
+                );
             })
             .catch(e => {
                 console.log('e:', e);
             });
         Promise.allSettled(takeTasks)
             .then(talist => {
-                console.log('takes: ', talist.filter(i => i.state === 0).length);
+                console.log(
+                    'takes: ',
+                    talist.filter(i => i.state === 0).length
+                );
             })
             .catch(e => {
                 console.log('e:', e);
@@ -1081,6 +1136,7 @@ module.exports = {
     getSessionLite,
     getProjectList,
     getProjectData,
+    getProjectDataList,
     setProjectData,
     getProject,
     addProject,

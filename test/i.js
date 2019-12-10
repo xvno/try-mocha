@@ -6,7 +6,7 @@ const { initDB, getSession, setSession, getSessionLite } = db;
 
 const { users } = secrets;
 const { username, password } = users[0];
-const { isNull } = require('../utils/utils');
+// const { isNull } = require('../utils/utils');
 const { login } = require('../partners/i/user');
 const { isValidPlainObject, isValidArray } = require('../utils/utils');
 const {
@@ -19,7 +19,9 @@ const {
     setProjectData,
     getSceneList,
     getEpisodeList,
-    getProjectData
+    getProjectData,
+    getProjectList,
+    getProjectDataList
 } = require('../partners/db.js');
 
 describe('DIT', function() {
@@ -107,7 +109,7 @@ describe('DIT', function() {
                 });
             });
         });
-        describe('Project', function() {
+        describe.only('Project', function() {
             describe('# remote', function() {
                 it('# fetchProjectList', function() {
                     return fetchProjectList(userid, accessToken).then(v => {
@@ -193,16 +195,51 @@ describe('DIT', function() {
                     let p = projectList[0];
                     console.log('getProjectData: projectid: ', p.id);
                     return getProjectData(userid, p.id).then(v => {
+                        /* console.log(
+                            '------------------------------------------------------------------------------------'
+                        );
                         console.log('getProjectData: v:\n', v);
-
+                        console.log('getProjectData: v:\n', JSON.stringify(v));
+                        console.log(
+                            '------------------------------------------------------------------------------------'
+                        ); */
+                        assert(
+                            isValidPlainObject(v) && isValidPlainObject(v.data),
+                            'should be an object'
+                        );
+                    });
+                });
+                it('# getProjectList', function() {
+                    return getProjectList(userid).then(v => {
+                        console.log('getProjectList v: ', v);
                         assert(
                             isValidPlainObject(v) && isValidArray(v.data),
-                            'should be an object'
+                            'should be an array'
+                        );
+                    });
+                });
+                it('# getProjectDataList', function() {
+                    // let p = projectList[0];
+                    console.log('i.js: getProjectDataList');
+                    return getProjectDataList(userid).then(v => {
+                        console.log(
+                            '------------------------------------------------------------------------------------'
+                        );
+                        console.log('getProjectDataList: v:\n', v);
+                        console.log(
+                            'getProjectDataList: v:\n',
+                            JSON.stringify(v)
+                        );
+                        console.log(
+                            '------------------------------------------------------------------------------------'
+                        );
+                        assert(
+                            isValidPlainObject(v) && isValidArray(v.data),
+                            'should be an array'
                         );
                     });
                 });
             });
         });
-
     });
 });
