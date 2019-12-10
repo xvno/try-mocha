@@ -108,7 +108,7 @@ function login(formData) {
     } else {
         return Promise.reject({
             state: CODE.STATE_ERROR,
-            message: MESSAGE.API_PARAM,
+            message: MESSAGE.API_PARAM_I,
             data: {
                 detail: '用户名 or 密码错误',
                 error: { username, password }

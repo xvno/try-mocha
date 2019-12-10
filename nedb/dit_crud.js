@@ -2,7 +2,7 @@
 const { isValidArray } = require('../utils/utils.js');
 const Nedb = require('nedb');
 const path = require('path');
-
+const { CODE, MESSAGE } = require('../partners/code.js');
 let db = null;
 let dbfile = path.resolve(__dirname, 'db');
 
