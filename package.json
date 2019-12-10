@@ -16,11 +16,10 @@
         "ffmpeg-static": "^2.7.0",
         "ffprobe": "^1.1.0",
         "ffprobe-static": "^3.0.0",
+        "lodash": "^4.17.15",
         "mocha": "^6.2.2",
         "nedb": "^1.8.0",
         "nyc": "^14.1.1"
     },
-    "dependencies": {
-        "lodash": "^4.17.15"
-    }
+    "dependencies": {}
 }

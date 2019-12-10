@@ -14,6 +14,13 @@ const {
     fetchProjectScene
 } = require('../partners/i/project.js');
 
+const {
+    setProjectData,
+    getSceneList,
+    getEpisodeList,
+    getProjectData
+} = require('../partners/db.js');
+
 describe('DIT', function() {
     describe('API', function() {
         initDB();
@@ -54,31 +61,90 @@ describe('DIT', function() {
             });
         });
         describe.only('Project', function() {
-            it('# fetchProjectList', function() {
-                return fetchProjectList(userid, accessToken).then(v => {
-                    console.log('fetchProjectList: v\n', v);
-                    projectList = v.data;
-                    assert(isValidArray(v.data), 'Should be an list');
+            describe('# remote', function() {
+                it('# fetchProjectList', function() {
+                    return fetchProjectList(userid, accessToken).then(v => {
+                        console.log('fetchProjectList: v\n', v);
+                        projectList = v.data;
+                        assert(isValidArray(v.data), 'Should be an list');
+                    });
+                });
+                it('# fetchProjectScene', function() {
+                    let projectSceneData;
+                    return fetchProjectScene(
+                        userid,
+                        accessToken,
+                        projectList[0].id
+                    )
+                        .then(
+                            v => {
+                                // console.log('v: ', v);
+                                projectSceneData = v.data;
+                                projectList[0] = Object.assign(
+                                    projectList[0],
+                                    projectSceneData
+                                );
+                                // console.log('projectList[0]: ', projectList[0]);
+                            },
+                            r => {
+                                console.log('r: ', r);
+                            }
+                        )
+                        .finally(() => {
+                            assert(
+                                isValidPlainObject(projectSceneData),
+                                'should be an object'
+                            );
+                        });
                 });
             });
-            it('# fetchProjectScene', function() {
-                let projectSceneData;
-                return fetchProjectScene(userid, accessToken, projectList[0].id)
-                    .then(
-                        v => {
-                            console.log('v: ', v);
-                            projectSceneData = v.data;
-                        },
-                        r => {
-                            console.log('r: ', r);
-                        }
-                    )
-                    .finally(() => {
+            describe('# db', function() {
+                it('# setProjectData', function() {
+                    return setProjectData(projectList[0]).then(v => {
+                        console.log('setProjectData.then:\n', v);
+                        assert(isValidPlainObject(v), 'should be an object');
+                    });
+                });
+                it('# getEpisodeList', function() {
+                    let p = projectList[0];
+
+                    let episodelist = p.children;
+                    console.log('episodep amt: ', episodelist.length);
+                    return getEpisodeList(userid, p.id).then(v => {
+                        console.log('getEpisodeList v:\n', v);
                         assert(
-                            isValidPlainObject(projectSceneData),
+                            isValidPlainObject(v) &&
+                                isValidArray(v.data) &&
+                                v.data.length == episodelist.length,
+                            'should be an normal ret data'
+                        );
+                    });
+                });
+                it('# getSceneList', function() {
+                    let p = projectList[0];
+                    // console.log('p: ', p);
+                    let episodelist = p.children;
+                    return getSceneList(userid, p.id, episodelist[0].id).then(
+                        v => {
+                            assert(
+                                isValidPlainObject(v) && isValidArray(v.data),
+                                'should be an normal ret data'
+                            );
+                        }
+                    );
+                });
+                it('# getProjectData', function() {
+                    let p = projectList[0];
+                    console.log('getProjectData: projectid: ', p.id);
+                    return getProjectData(userid, p.id).then(v => {
+                        console.log('getProjectData: v:\n', v);
+                        
+                        assert(
+                            isValidPlainObject(v) && isValidArray(v.data),
                             'should be an object'
                         );
                     });
+                });
             });
         });
 

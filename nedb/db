@@ -1,20 +1,20 @@
-{"userid":"tester","mag":"episode","id":"Episode-0001","name":"大学操场","projectid":"Project-00001","alive":true,"_id":"9lrDBhzvSlatEICJ"}
-{"userid":"tester","mag":"scene","id":"Scene-0001","name":"接力赛跑","projectid":"Project-00001","episodeid":"Episode-0001","alive":true,"_id":"BbdE4lBp8FrLPpYe"}
-{"userid":"tester","mag":"take","id":"Take-0001","projectid":"Project-00001","episodeid":"Episode-0001","sceneid":"Scene-0001","shotid":"Shot-0001","name":"updated Take-0001","alive":true,"_id":"LbXuZgEiGaKc3yS5"}
-{"userid":"tester","mag":"project","id":"Project-00001","name":"大江大海一箱啤酒","alive":true,"_id":"c28YoyLQ59DwqkVt"}
-{"userid":"tester","mag":"shot","id":"Shot-0001","projectid":"Project-00001","episodeid":"Episode-0001","sceneid":"Scene-0001","name":"updated Shot-0001","alive":true,"_id":"zDve93hiTaw2C6Yk"}
-{"$$deleted":true,"_id":"9lrDBhzvSlatEICJ"}
-{"$$deleted":true,"_id":"BbdE4lBp8FrLPpYe"}
-{"$$deleted":true,"_id":"LbXuZgEiGaKc3yS5"}
-{"$$deleted":true,"_id":"c28YoyLQ59DwqkVt"}
-{"$$deleted":true,"_id":"zDve93hiTaw2C6Yk"}
-{"userid":"tester","mag":"project","id":"Project-00001","name":"大江大河","alive":true,"_id":"GGgunVGWAFdLTFTO"}
 {"userid":"tester","mag":"project","id":"Project-00001","name":"大江大海一箱啤酒","alive":true,"_id":"GGgunVGWAFdLTFTO"}
-{"userid":"tester","mag":"episode","id":"Episode-0001","name":"大学教室","projectid":"Project-00001","alive":true,"_id":"cOSMUFzBwkKAedSc"}
-{"userid":"tester","mag":"episode","id":"Episode-0001","name":"大学操场","projectid":"Project-00001","alive":true,"_id":"cOSMUFzBwkKAedSc"}
-{"userid":"tester","mag":"scene","id":"Scene-0001","name":"大学教室","projectid":"Project-00001","episodeid":"Episode-0001","alive":true,"_id":"L9ZsochJkzM1mulC"}
 {"userid":"tester","mag":"scene","id":"Scene-0001","name":"接力赛跑","projectid":"Project-00001","episodeid":"Episode-0001","alive":true,"_id":"L9ZsochJkzM1mulC"}
-{"userid":"tester","mag":"shot","id":"Shot-0001","projectid":"Project-00001","episodeid":"Episode-0001","sceneid":"Scene-0001","name":"Shot-0001","alive":true,"_id":"VIEaL2LhpDoQ7pc1"}
 {"userid":"tester","mag":"shot","id":"Shot-0001","projectid":"Project-00001","episodeid":"Episode-0001","sceneid":"Scene-0001","name":"updated Shot-0001","alive":true,"_id":"VIEaL2LhpDoQ7pc1"}
-{"userid":"tester","mag":"take","id":"Take-0001","projectid":"Project-00001","episodeid":"Episode-0001","sceneid":"Scene-0001","shotid":"Shot-0001","name":"Take-0001","alive":true,"_id":"k0wiwGcjggPOu6Tq"}
+{"userid":"tester","mag":"episode","id":"Episode-0001","name":"大学操场","projectid":"Project-00001","alive":true,"_id":"cOSMUFzBwkKAedSc"}
 {"userid":"tester","mag":"take","id":"Take-0001","projectid":"Project-00001","episodeid":"Episode-0001","sceneid":"Scene-0001","shotid":"Shot-0001","name":"updated Take-0001","alive":true,"_id":"k0wiwGcjggPOu6Tq"}
+{"$$deleted":true,"_id":"GGgunVGWAFdLTFTO"}
+{"$$deleted":true,"_id":"L9ZsochJkzM1mulC"}
+{"$$deleted":true,"_id":"VIEaL2LhpDoQ7pc1"}
+{"$$deleted":true,"_id":"cOSMUFzBwkKAedSc"}
+{"$$deleted":true,"_id":"k0wiwGcjggPOu6Tq"}
+{"userid":"tester","mag":"project","id":"Project-00001","name":"大江大河","alive":true,"_id":"qA1yUBYHRflZlnSv"}
+{"userid":"tester","mag":"project","id":"Project-00001","name":"大江大海一箱啤酒","alive":true,"_id":"qA1yUBYHRflZlnSv"}
+{"userid":"tester","mag":"episode","id":"Episode-0001","name":"大学教室","projectid":"Project-00001","alive":true,"_id":"8szvtYHV2qVunZ0Z"}
+{"userid":"tester","mag":"episode","id":"Episode-0001","name":"大学操场","projectid":"Project-00001","alive":true,"_id":"8szvtYHV2qVunZ0Z"}
+{"userid":"tester","mag":"scene","id":"Scene-0001","name":"大学教室","projectid":"Project-00001","episodeid":"Episode-0001","alive":true,"_id":"xuEuNK0MQkH3bkul"}
+{"userid":"tester","mag":"scene","id":"Scene-0001","name":"接力赛跑","projectid":"Project-00001","episodeid":"Episode-0001","alive":true,"_id":"xuEuNK0MQkH3bkul"}
+{"userid":"tester","mag":"shot","id":"Shot-0001","projectid":"Project-00001","episodeid":"Episode-0001","sceneid":"Scene-0001","name":"Shot-0001","alive":true,"_id":"V91GjPLfLss9Jff2"}
+{"userid":"tester","mag":"shot","id":"Shot-0001","projectid":"Project-00001","episodeid":"Episode-0001","sceneid":"Scene-0001","name":"updated Shot-0001","alive":true,"_id":"V91GjPLfLss9Jff2"}
+{"userid":"tester","mag":"take","id":"Take-0001","projectid":"Project-00001","episodeid":"Episode-0001","sceneid":"Scene-0001","shotid":"Shot-0001","name":"Take-0001","alive":true,"_id":"X7eDZcv43iYvaKPX"}
+{"userid":"tester","mag":"take","id":"Take-0001","projectid":"Project-00001","episodeid":"Episode-0001","sceneid":"Scene-0001","shotid":"Shot-0001","name":"updated Take-0001","alive":true,"_id":"X7eDZcv43iYvaKPX"}

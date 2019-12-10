@@ -1,10 +1,11 @@
 /*globals __dirname */
+const _ = require('lodash');
 const Nedb = require('nedb');
 const path = require('path');
 
 let db = null;
 let dbfile = path.resolve(__dirname, 'database');
-const { isValidArray } = require('../utils/utils.js');
+const { isValidArray, isValidPlainObject } = require('../utils/utils.js');
 
 console.log('dbfile: \n', dbfile);
 
@@ -94,7 +95,233 @@ function setSession(session) {
     });
 }
 
-function setProjectData(project) {
+/***********************************************************************************************************/
+
+function getProjectData(userid, projectid) {
+    return getProject(userid, projectid)
+        .then(project => {
+            console.log('project: ', project);
+            let projectList = [project.data];
+            let episodeList = null;
+            let projectIdList = projectList.reduce((pre, cur) => {
+                pre.push(cur.id);
+                return pre;
+            }, []);
+            // TODO: 改写getEpisodeList, 使其能查询projectid列表中的所有项目集
+            return getEpisodeListViaPIDList(userid, projectIdList).then(
+                v => {
+                    // v is episode-list;
+                    episodeList = v;
+                    projectList.forEach(project => {
+                        project.children = episodeList.find(
+                            episode => episode.projectid === project.id
+                        );
+                    });
+                    return getSceneDataForEpisode(userid, episodeList).then(
+                        vv => {
+                            let sceneList = vv;
+                            episodeList.forEach(episode => {
+                                episode.children = sceneList.find(
+                                    scene => scene.episodeid === episode.id
+                                );
+                            });
+                            return getShotDataForScene(userid, sceneList).then(
+                                vvv => {
+                                    let shotList = vvv;
+                                    sceneList.forEach(scene => {
+                                        scene.children = shotList.find(
+                                            shot => shot.sceneid === scene.id
+                                        );
+                                    });
+                                    return getTakeDataForShot(
+                                        userid,
+                                        shotList
+                                    ).then(
+                                        vvv => {
+                                            let takeList = vvv;
+                                            shotList.forEach(shot => {
+                                                shot.children = takeList.find(
+                                                    take =>
+                                                        take.shotid === shot.id
+                                                );
+                                            });
+                                            return {
+                                                state: 0,
+                                                data: projectList
+                                            };
+                                        },
+                                        () => {
+                                            return Promise.resolve({
+                                                state: 0,
+                                                data: project
+                                            });
+                                        }
+                                    );
+                                },
+                                () => {
+                                    return Promise.resolve({
+                                        state: 0,
+                                        data: project
+                                    });
+                                }
+                            );
+                        },
+                        () => {
+                            return Promise.resolve({
+                                state: 0,
+                                data: project
+                            });
+                        }
+                    );
+                },
+                () => {
+                    // without episode
+                    return Promise.resolve({
+                        state: 0,
+                        data: project
+                    });
+                }
+            );
+        })
+        .catch(e => {
+            return Promise.reject(e);
+        });
+}
+
+function getEpisodeListViaPIDList(userid, pidlist) {
+    return new Promise(function(resolve, reject) {
+        db.find(
+            {
+                mag: 'episode',
+                userid,
+                projectid: {
+                    $in: pidlist
+                }
+            },
+            (err, list) => {
+                if (err) {
+                    reject({
+                        state: 1,
+                        message: 'DB error',
+                        data: {
+                            detail: '获取"集"信息出错',
+                            error: err
+                        }
+                    });
+                }
+                resolve(list);
+            }
+        );
+    });
+    /* let taskList = [];
+    let container = [];
+    for (let i = pidlist.length - 1; i > 0; i--) {
+        taskList.push(getEpisodeList(userid, pidlist[i], container));
+    }
+    return Promise.allSettled(taskList).then(
+        v => {
+            console.log('v: ', v);
+            return container;
+            // return Promise.resolve(container);
+        },
+        r => {
+            console.log('r: ', r);
+            return container;
+            // return Promise.resolve(container);
+        }
+    ); */
+}
+function getTakeDataForShot(userid, shotList) {
+    let shotIDList = shotList.map(e => e.id);
+
+    // shotid 也是独一无二的
+    return new Promise(function(resolve, reject) {
+        db.find(
+            {
+                mag: 'shot',
+                userid,
+                shotid: {
+                    $in: shotIDList
+                }
+            },
+            (err, list) => {
+                if (err) {
+                    reject({
+                        state: 1,
+                        message: 'DB error',
+                        data: {
+                            detail: '获取"次"信息出错',
+                            error: err
+                        }
+                    });
+                }
+                resolve(list);
+            }
+        );
+    });
+}
+function getShotDataForScene(userid, sceneList) {
+    let sceneIDList = sceneList.map(e => e.id);
+
+    // sceneid 也是独一无二的
+    return new Promise(function(resolve, reject) {
+        db.find(
+            {
+                mag: 'shot',
+                userid,
+                sceneid: {
+                    $in: sceneIDList
+                }
+            },
+            (err, list) => {
+                if (err) {
+                    reject({
+                        state: 1,
+                        message: 'DB error',
+                        data: {
+                            detail: '获取"镜"信息出错',
+                            error: err
+                        }
+                    });
+                }
+                resolve(list);
+            }
+        );
+    });
+}
+function getSceneDataForEpisode(userid, episodeList) {
+    let episodIDList = episodeList.map(e => e.id);
+
+    // episodeid 也是独一无二的
+    return new Promise(function(resolve, reject) {
+        db.find(
+            {
+                mag: 'scene',
+                userid,
+                episodeid: {
+                    $in: episodIDList
+                }
+            },
+            (err, list) => {
+                if (err) {
+                    reject({
+                        state: 1,
+                        message: 'DB error',
+                        data: {
+                            detail: '获取"场"信息出错',
+                            error: err
+                        }
+                    });
+                }
+                resolve(list);
+            }
+        );
+    });
+}
+
+/***********************************************************************************************************/
+function setProjectData(projectData) {
+    let project = _.cloneDeep(projectData);
     let { userid } = project;
     // let projectid = project.id;
     let episodelist = project.children;
@@ -107,8 +334,11 @@ function setProjectData(project) {
     let takeTasks = [];
     if (isValidArray(episodelist)) {
         delete project['children'];
+        let episodeAmt = 0;
         episodelist.forEach(episode => {
             let list = episode.children;
+            episodeAmt += list.length;
+            // console.log('children amt: ', list.length);
             if (isValidArray(list)) {
                 delete episode['children'];
                 scenelist = scenelist.concat(list);
@@ -119,7 +349,10 @@ function setProjectData(project) {
                 console.log('e: ', e)
             } */
             episodeTasks.push(updateEpisode(userid, episode));
+            // console.log(`episode:\n`, episode);
         });
+        console.log('scene amount(++children.length): ', episodeAmt);
+        let sceneAmt = 0;
         if (scenelist.length > 0) {
             scenelist.forEach(scene => {
                 let list = scene.children;
@@ -129,7 +362,10 @@ function setProjectData(project) {
                 }
                 // await updateScene(userid, scene);
                 sceneTasks.push(updateScene(userid, scene));
+                // console.log(`scene:\n`, scene);
+                sceneAmt++;
             });
+            console.log('scene amount: ', sceneAmt);
         }
         if (shotlist.length > 0) {
             shotlist.forEach(shot => {
@@ -140,12 +376,14 @@ function setProjectData(project) {
                 }
                 // await updateShot(userid, shot);
                 shotTasks.push(updateShot(userid, shot));
+                console.log(`shot:\n`, shot);
             });
         }
         if (takelist.length > 0) {
             takelist.forEach(take => {
                 // await updateTake(userid, take);
                 takeTasks.push(updateTake(userid, take));
+                console.log(`take:\n`, take);
             });
         }
         Promise.allSettled(episodeTasks).then(eplist => {
@@ -187,6 +425,34 @@ function clearDB() {
         });
     });
 }
+
+// function getProjectData(userid, id) {
+//     let project;
+//     return new Promise(function (resolve, reject) {
+//         return getProject(userid, id).then(v => {
+//             let p = v.data;
+//             if (isValidPlainObject(p)) {
+//                 project = p;
+//                 return getEpisodeList(userid, id).then(vv => {
+//                     let episodelist = vv.data;
+//                     if (isValidArray(episodelist)) {
+//                         p.children = episodelist;
+
+//                     }
+//                 })
+//             }
+//         }).catch(e => {
+//             reject({
+//                 state: 1,
+//                 data: {
+//                     error: e
+//                 }
+//             })
+//         }).finally(() => {
+
+//         })
+//     })
+// }
 
 function getProject(userid, id) {
     return new Promise(function(resolve, reject) {
@@ -256,6 +522,26 @@ function updateProject(userid, project) {
                 });
             }
         );
+    });
+}
+function getEpisodeList(userid, projectid) {
+    return new Promise(function(resolve, reject) {
+        db.find({ userid, mag: 'episode', projectid }, (err, doc) => {
+            if (err) {
+                reject({
+                    state: 1,
+                    message: 'DB Error',
+                    data: {
+                        detail: 'FindOne 数据出错',
+                        error: err
+                    }
+                });
+            }
+            resolve({
+                state: 0,
+                data: doc
+            });
+        });
     });
 }
 function getEpisode(userid, projectid, id) {
@@ -332,6 +618,26 @@ function updateEpisode(userid, episode) {
                 });
             }
         );
+    });
+}
+function getSceneList(userid, projectid, episodeid) {
+    return new Promise(function(resolve, reject) {
+        db.find({ userid, mag: 'scene', projectid, episodeid }, (err, list) => {
+            if (err) {
+                reject({
+                    state: 1,
+                    message: 'DB Error',
+                    data: {
+                        detail: 'FindOne 数据出错',
+                        error: err
+                    }
+                });
+            }
+            resolve({
+                state: 0,
+                data: list
+            });
+        });
     });
 }
 
@@ -416,6 +722,30 @@ function updateScene(userid, scene) {
     });
 }
 
+function getShotList(userid, projectid, episodeid, sceneid) {
+    return new Promise(function(resolve, reject) {
+        db.find(
+            { userid, mag: 'shot', projectid, episodeid, sceneid },
+            (err, doc) => {
+                if (err) {
+                    reject({
+                        state: 1,
+                        message: 'DB Error',
+                        data: {
+                            detail: 'FindOne 数据出错',
+                            error: err
+                        }
+                    });
+                }
+                resolve({
+                    state: 0,
+                    data: doc
+                });
+            }
+        );
+    });
+}
+
 function getShot(userid, projectid, episodeid, sceneid, id) {
     return new Promise(function(resolve, reject) {
         db.findOne(
@@ -494,7 +824,29 @@ function updateShot(userid, shot) {
         );
     });
 }
-
+function getTakeList(userid, projectid, episodeid, sceneid, shotid) {
+    return new Promise(function(resolve, reject) {
+        db.findOne(
+            { userid, mag: 'take', projectid, episodeid, sceneid, shotid },
+            (err, doc) => {
+                if (err) {
+                    reject({
+                        state: 1,
+                        message: 'DB Error',
+                        data: {
+                            detail: 'FindOne 数据出错',
+                            error: err
+                        }
+                    });
+                }
+                resolve({
+                    state: 0,
+                    data: doc
+                });
+            }
+        );
+    });
+}
 function getTake(userid, projectid, episodeid, sceneid, shotid, id) {
     return new Promise(function(resolve, reject) {
         db.findOne(
@@ -715,22 +1067,27 @@ module.exports = {
     getSession,
     setSession,
     getSessionLite,
+    getProjectData,
+    setProjectData,
     getProject,
     addProject,
     updateProject,
+    getEpisodeList,
     getEpisode,
     addEpisode,
     updateEpisode,
     getScene,
+    getSceneList,
     addScene,
     updateScene,
+    getShotList,
     getShot,
     addShot,
     updateShot,
+    getTakeList,
     getTake,
     addTake,
     updateTake,
     destruct,
-    construct,
-    setProjectData
+    construct
 };
