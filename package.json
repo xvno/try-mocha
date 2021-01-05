@@ -9,7 +9,7 @@
     "author": "vno <Volving@Icloud.Com> (http://vno.io)",
     "license": "MIT",
     "devDependencies": {
-        "axios": "^0.19.0",
+        "axios": "^0.21.1",
         "chai": "^4.2.0",
         "directory-tree": "^2.2.4",
         "eslint": "^6.7.2",
